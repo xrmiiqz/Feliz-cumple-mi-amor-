@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas para Ti</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #e0e0e0;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background-image: url('rdr2-background.jpg'); /* Imagen de fondo estilo RDR2 */
+            background-size: cover;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 2px solid #888; /* Bordes estilo rústico */
+        }
+        h1 {
+            font-size: 36px;
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .button-container, .note-container, .message-container {
+            display: none;
+        }
+        .button-container.active, .note-container.active, .message-container.active {
+            display: block;
+        }
+        .button {
+            display: inline-block;
+            background-color: #6c757d;
+            color: #f8f9fa;
+            padding: 15px 25px;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            font-size: 18px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .button:hover {
+            background-color: #5a6268;
+            transform: translateY(-3px);
+        }
+        .note {
+            display: inline-block;
+            background-color: #f8f9fa;
+            width: 150px;
+            height: 150px;
+            margin: 10px;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            text-align: center; /* Centrar el número */
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border: 1px solid #333;
+        }
+        .note:hover {
+            background-color: #e2e6ea;
+            transform: translateY(-3px);
+        }
+        .note-number {
+            font-size: 48px; /* Tamaño más grande para el número */
+            font-weight: bold;
+            color: #333;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #333;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border: 1px solid #333;
+        }
+        .back-button, .return-button {
+            display: inline-block;
+            background-color: #6c757d;
+            color: #f8f9fa;
+            padding: 10px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .back-button:hover, .return-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="greeting">Buenas tardes, al amor de mi vida</h1>
+        <div id="button-container" class="button-container active">
+            <div class="button" data-mood="feliz">Feliz</div>
+            <div class="button" data-mood="enfadado">Enfadado</div>
+            <div class="button" data-mood="triste">Triste</div>
+            <div class="button" data-mood="desmotivado">Desmotivado</div>
+            <div class="button" data-mood="preocupado">Preocupado</div>
+            <div class="button" data-mood="amor">Amor</div>
+        </div>
+
+        <div id="note-container" class="note-container">
+            <h2>Selecciona una nota</h2>
+            <div id="notes-container"></div>
+            <div class="back-button" id="back-button">Volver</div>
+        </div>
+
+        <div id="message-container" class="message-container">
+            <div id="message"></div>
+            <div class="return-button" id="return-button">Volver a Notas</div>
+        </div>
+    </div>
+
+    <script>
+        const notes = Array.from({length: 20}, (_, i) => i + 1);
+        const messages = {
+            "feliz": [
+                "Tu alegría es mi motor, incluso en la distancia.",
+                "Sonreír contigo es lo mejor de mis días.",
+                "Tu felicidad ilumina mi mundo, aunque no estemos cerca.",
+                "Cada mensaje tuyo me da un rayo de sol.",
+                "Eres la razón detrás de mi sonrisa, siempre.",
+                "Aunque estemos lejos, tu alegría es contagiosa.",
+                "Cada momento feliz contigo lo atesoro.",
+                "Tu risa es la mejor melodía que puedo escuchar.",
+                "Incluso en la distancia, me haces tan feliz.",
+                "Verte sonreír es el mejor regalo que recibo.",
+                "Tu alegría es lo que más me llena el corazón.",
+                "Estar contigo, aunque sea en pensamiento, me da paz.",
+                "Tu felicidad es mi paz mental.",
+                "Saber que estás bien me hace feliz.",
+                "Tu felicidad es mi meta diaria.",
+                "Aunque estemos lejos, siempre estás en mi corazón.",
+                "Verte feliz es lo que más deseo.",
+                "Tu felicidad es la mía, siempre.",
+                "Cada día contigo, incluso a distancia, es un día feliz.",
+                "Me haces feliz con solo pensar en ti."
+            ],
+            "enfadado": [
+                "Estoy aquí para escucharte, incluso cuando estás molesto.",
+                "Tu enojo no cambia lo que siento por ti.",
+                "Hablemos y resolvamos esto juntos.",
+                "Estoy aquí para apoyarte, incluso en los momentos difíciles.",
+                "Entiendo que estés molesto y quiero ayudarte.",
+                "Estoy dispuesta a escucharte y buscar una solución.",
+                "No importa lo que pase, siempre estaré aquí para ti.",
+                "Quiero que sepas que estoy aquí, incluso en los momentos difíciles.",
+                "Tu enojo no cambiará mi amor por ti.",
+                "Estoy aquí para ofrecerte mi apoyo y comprensión.",
+                "Podemos superar esto juntos, no estás solo.",
+                "Quiero que sepas que siempre estoy aquí para ti.",
+                "Hablemos de lo que te preocupa, quiero ayudarte.",
+                "Tu enfado no cambiará mi cariño por ti.",
+                "Estoy aquí para ofrecerte mi comprensión y apoyo.",
+                "No importa lo que pase, estoy a tu lado.",
+                "Podemos resolver esto juntos, no estás solo.",
+                "Entiendo que estés molesto, y estoy aquí para ayudarte.",
+                "Tu enojo no cambiará lo que siento por ti.",
+                "Quiero que sepas que siempre estoy aquí para escucharte."
+            ],
+            "triste": [
+                "Estoy aquí para ti, siempre.",
+                "Tu tristeza me duele, pero estoy a tu lado.",
+                "No importa la distancia, estoy aquí contigo.",
+                "Quiero que sepas que puedes contar conmigo.",
+                "Aunque estemos lejos, estoy aquí para ti.",
+                "Tu tristeza no cambia lo que siento por ti.",
+                "Estoy aquí para escucharte y apoyarte.",
+                "Aunque no esté allí, mi amor está contigo.",
+                "No estás solo, estoy aquí contigo.",
+                "Tu tristeza me duele, pero estoy aquí para ayudarte.",
+                "Estoy aquí para ofrecerte mi amor y apoyo.",
+                "Tu dolor es mi dolor, y quiero ayudarte.",
+                "No importa lo lejos que estemos, estoy contigo.",
+                "Estoy aquí para escucharte y ofrecerte mi apoyo.",
+                "Tu tristeza me preocupa, pero estoy aquí para ti.",
+                "No estás solo, estoy aquí para ayudarte.",
+                "Quiero que sepas que siempre estoy aquí para ti.",
+                "Tu tristeza no cambiará mi amor por ti.",
+                "Estoy aquí para ofrecerte mi apoyo incondicional.",
+                "Aunque estemos lejos, mi amor está contigo."
+            ],
+            "desmotivado": [
+                "Tu fortaleza es admirable, incluso en los días difíciles.",
+                "Sé que estos momentos son duros, pero estoy contigo.",
+                "Cada desafío que enfrentas solo muestra tu valentía.",
+                "Confía en que todo mejorará, estoy a tu lado.",
+                "Eres más fuerte de lo que piensas, no estás solo.",
+                "Aunque te sientas desmotivado, tu valor no disminuye.",
+                "Estoy aquí para recordarte lo increíble que eres.",
+                "Cada día es un nuevo comienzo, y yo estoy contigo.",
+                "Tu esfuerzo y dedicación son notables, sigue adelante.",
+                "No te rindas, estoy aquí para apoyarte siempre.",
+                "Cada paso que das, por pequeño que sea, cuenta.",
+                "Estoy aquí para levantarte cuando te sientas caído.",
+                "Tu perseverancia es lo que te hace fuerte.",
+                "Aunque te sientas desmotivado, no estás solo en esto.",
+                "Cada día trae nuevas oportunidades, y estoy contigo.",
+                "Confía en ti mismo, porque yo confío en ti.",
+                "Estoy aquí para ofrecerte ánimo y apoyo incondicional.",
+                "Tus logros son importantes, incluso cuando no lo sientes.",
+                "Recuerda que siempre estoy aquí para motivarte."
+            ],
+            "preocupado": [
+                "Entiendo tus preocupaciones y estoy aquí para ti.",
+                "Hablemos de lo que te preocupa, quiero ayudarte.",
+                "Aunque estés preocupado, mi amor está contigo.",
+                "Estoy aquí para ofrecerte mi apoyo y comprensión.",
+                "No importa lo que pase, estoy a tu lado.",
+                "Tus preocupaciones no te hacen menos fuerte, estoy contigo.",
+                "Confía en que todo saldrá bien, y yo estaré a tu lado.",
+                "Estoy aquí para escucharte y apoyarte en tus inquietudes.",
+                "Tu bienestar es importante para mí, cuídate.",
+                "No estás solo en esto, estoy aquí para ayudarte.",
+                "Podemos enfrentar cualquier cosa juntos, no te preocupes.",
+                "Hablemos y resolvamos esto, estoy aquí para ti.",
+                "No importa cuán grande sea tu preocupación, estoy contigo.",
+                "Confía en que encontraré maneras de ayudarte.",
+                "Tus preocupaciones son válidas, y estoy aquí para escucharlas.",
+                "Estoy a tu lado, incluso en los momentos más difíciles.",
+                "No dejes que la preocupación te agobie, estoy aquí para ti.",
+                "Tu bienestar es mi prioridad, y estoy aquí para apoyarte.",
+                "Juntos podemos superar cualquier preocupación.",
+                "Estoy aquí para ofrecerte tranquilidad y apoyo."
+            ],
+            "amor": [
+                "Cada día contigo es un regalo, te amo más de lo que palabras pueden expresar.",
+                "Eres mi pensamiento constante y mi corazón late por ti.",
+                "Nuestro amor trasciende la distancia y el tiempo.",
+                "Te amo más de lo que puedes imaginar, siempre estás en mi mente.",
+                "Cada momento contigo es precioso, incluso en la distancia.",
+                "Nuestro amor es mi refugio y mi mayor alegría.",
+                "Te amo con todo mi corazón, y eso nunca cambiará.",
+                "Eres la razón de mi felicidad y mi mayor tesoro.",
+                "Cada día sin ti me hace apreciar aún más nuestro amor.",
+                "Nuestro amor es un viaje que siempre quiero compartir contigo.",
+                "Te amo más allá de las palabras, y mi amor por ti solo crece.",
+                "Eres mi sueño hecho realidad y mi amor eterno.",
+                "Cada instante contigo es un recuerdo que atesoro.",
+                "Te amo más de lo que puedo expresar, incluso en la distancia.",
+                "Nuestro amor es mi mayor bendición, y estoy agradecida por ti.",
+                "Eres mi sol en días nublados y mi paz en la tormenta.",
+                "Te amo con una profundidad que va más allá de las palabras.",
+                "Nuestro amor es mi mayor fuerza y mi mayor alegría.",
+                "Cada pensamiento sobre ti llena mi corazón de amor."
+            ]
+        };
+
+        const buttonContainer = document.getElementById('button-container');
+        const noteContainer = document.getElementById('note-container');
+        const messageContainer = document.getElementById('message-container');
+        const notesContainer = document.getElementById('notes-container');
+        const messageElement = document.getElementById('message');
+
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('click', function() {
+                const mood = this.getAttribute('data-mood');
+                buttonContainer.classList.remove('active');
+                noteContainer.classList.add('active');
+
+                notesContainer.innerHTML = '';
+                notes.forEach(number => {
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'note';
+                    noteDiv.innerHTML = `<div class="note-number">${number}</div>`;
+                    noteDiv.addEventListener('click', () => {
+                        messageElement.textContent = messages[mood][number - 1];
+                        noteContainer.classList.remove('active');
+                        messageContainer.classList.add('active');
+                    });
+                    notesContainer.appendChild(noteDiv);
+                });
+            });
+        });
+
+        document.getElementById('back-button').addEventListener('click', () => {
+            noteContainer.classList.remove('active');
+            buttonContainer.classList.add('active');
+        });
+
+        document.getElementById('return-button').addEventListener('click', () => {
+            messageContainer.classList.remove('active');
+            noteContainer.classList.add('active');
+        });
+    </script>
+</body>
+</html>
